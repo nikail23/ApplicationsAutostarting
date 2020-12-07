@@ -141,11 +141,15 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="CStringArray.cpp" />
+    <ClCompile Include="InputBox.cpp" />
     <ClCompile Include="Model.cpp" />
     <ClCompile Include="View.cpp" />
     <ClCompile Include="Controller.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="CStringArray.h" />
+    <ClInclude Include="InputBox.h" />
     <ClInclude Include="Model.h" />
     <ClInclude Include="View.h" />
   </ItemGroup>

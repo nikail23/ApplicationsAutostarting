@@ -1,0 +1,39 @@
+#include <Windows.h>
+// InputBox.h: interface for the CInputBox class.
+//
+//////////////////////////////////////////////////////////////////////
+
+#if !defined(AFX_INPUTBOX_H__0BE6B01B_C74A_45FE_AF35_D6E8E4B65A1B__INCLUDED_)
+#define AFX_INPUTBOX_H__0BE6B01B_C74A_45FE_AF35_D6E8E4B65A1B__INCLUDED_
+
+#if _MSC_VER > 1000
+#pragma once
+#endif 
+
+
+#define INPUTBOX_WIDTH 500
+#define INPUTBOX_HEIGHT 200
+
+
+class CInputBox  
+{
+    static HFONT m_hFont;
+    static HWND  m_hWndInputBox;
+    static HWND  m_hWndParent;
+    static HWND  m_hWndEdit;
+    static HWND  m_hWndOK;
+    static HWND  m_hWndCancel;
+    static HWND  m_hWndPrompt;
+
+    static HINSTANCE m_hInst;
+
+    static LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam);
+public:
+	LPTSTR Text;
+    BOOL DoModal(LPCTSTR szCaption, LPCTSTR szPrompt);
+
+	CInputBox(HWND hWndParent);
+	virtual ~CInputBox();
+};
+
+#endif 

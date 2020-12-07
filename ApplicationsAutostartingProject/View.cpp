@@ -10,21 +10,26 @@ AutostartListView::AutostartListView(HWND hWndParent, int x, int y, int width, i
         MessageBox(NULL, "Cant create a ListView component!", "Error!", MB_OK);
 }
 
-BOOL AutostartListView::AddListViewItems(int colNum, int textMaxLen, const char** item)
+BOOL AutostartListView::AddListViewItems(int colNum, int textMaxLen, char** item, int rowsNum)
 {
-    int iLastIndex = ListView_GetItemCount(hWndLV);
+    int textIndex = 0;
+    for (int itemIndex = 0; itemIndex < rowsNum; itemIndex++) {
+        char* text1 = item[textIndex];
+        char* text2 = item[textIndex + 1];
 
-    LVITEM lvi;
-    lvi.mask = LVIF_TEXT;
-    lvi.cchTextMax = textMaxLen;
-    lvi.iItem = iLastIndex;
-    lvi.pszText = (LPSTR)item[0];
-    lvi.iSubItem = 0;
+        LVITEM item;
+        item.mask = LVIF_TEXT;
+        item.cchTextMax = textMaxLen;
+        item.iItem = itemIndex;
+        item.pszText = text1;
+        item.iSubItem = 0;
 
-    if (ListView_InsertItem(hWndLV, &lvi) == -1)
-        return FALSE;
-    for (int i = 1; i < colNum; i++)
-        ListView_SetItemText(hWndLV, iLastIndex, i, (LPSTR)item[i]);
+        if (ListView_InsertItem(hWndLV, &item) == -1)
+            return FALSE;
+
+        ListView_SetItemText(hWndLV, itemIndex, 1, (LPSTR)text2);
+        textIndex += 2;
+    }
 
     return TRUE;
 }
@@ -89,7 +94,7 @@ AddAppButtonView::AddAppButtonView(HWND parent, int x, int y, int width, int hei
         width,        
         height,        
         parent,     
-        NULL,       
+        (HMENU)ADD_APP_BUTTON_CODE,       
         (HINSTANCE)GetWindowLongPtr(parent, GWLP_HINSTANCE),
         NULL);      
 }
@@ -114,7 +119,7 @@ RemoveAppButtonView::RemoveAppButtonView(HWND parent, int x, int y, int width, i
         width,
         height,
         parent,
-        NULL,
+        (HMENU)DELETE_APP_BUTTON_CODE,
         (HINSTANCE)GetWindowLongPtr(parent, GWLP_HINSTANCE),
         NULL);
 }

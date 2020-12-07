@@ -12,11 +12,14 @@ class AutostartListModel
 {
 	private:
 		std::list<AutostartedAppInfo> appsList;
+		std::list<AutostartedAppInfo> LoadListFromRegistry();
+		BOOL IsInRegister(AutostartedAppInfo appInfo);
 	public: 
 		AutostartListModel();
-		void AddAll(std::initializer_list<AutostartedAppInfo> newAppsInfo);
+		void Refresh();
 		void Add(AutostartedAppInfo appInfo);
+		void WriteToRegistry(AutostartedAppInfo appInfo);
 		void Delete(AutostartedAppInfo appInfo);
-		char** Get();
+		std::list<AutostartedAppInfo> Get();
 };
 
