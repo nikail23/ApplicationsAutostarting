@@ -14,6 +14,7 @@ class AutostartListView
 		BOOL AddListViewItems(int colNum, int textMaxLen, char** item, int rows);
 		int SetListViewColumns(int colNum, int textMaxLen, const char** header);
 		void Show();
+		void Clear();
 };
 
 class AddAppButtonView 

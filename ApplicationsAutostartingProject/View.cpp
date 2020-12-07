@@ -12,6 +12,8 @@ AutostartListView::AutostartListView(HWND hWndParent, int x, int y, int width, i
 
 BOOL AutostartListView::AddListViewItems(int colNum, int textMaxLen, char** item, int rowsNum)
 {
+    SendMessage(hWndLV, WM_SETREDRAW, FALSE, 0);
+
     int textIndex = 0;
     for (int itemIndex = 0; itemIndex < rowsNum; itemIndex++) {
         char* text1 = item[textIndex];
@@ -30,6 +32,8 @@ BOOL AutostartListView::AddListViewItems(int colNum, int textMaxLen, char** item
         ListView_SetItemText(hWndLV, itemIndex, 1, (LPSTR)text2);
         textIndex += 2;
     }
+
+    SendMessage(hWndLV, WM_SETREDRAW, TRUE, 0);
 
     return TRUE;
 }
@@ -59,6 +63,11 @@ int AutostartListView::SetListViewColumns(int colNum, int textMaxLen, const char
 void AutostartListView::Show()
 {
     ShowWindow(hWndLV, SW_SHOWDEFAULT);
+}
+
+void AutostartListView::Clear()
+{
+    SendMessage(hWndLV, LVM_DELETEALLITEMS, 0, 0);
 }
 
 HWND AutostartListView::CreateListView(HWND hWndParent, int x, int y, int width, int height, UINT uId)

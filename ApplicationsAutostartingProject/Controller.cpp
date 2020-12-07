@@ -1,9 +1,9 @@
 #include <windows.h>
-#include "View.h";
-#include "Model.h"
 #include <string>
 #include "CStringArray.h"
 #include "InputBox.h"
+#include "View.h"
+#include "Model.h"
 
 const int START_WINDOW_HEIGHT = 450;
 const int START_WINDOW_WIDTH = 640;
@@ -14,6 +14,12 @@ const int LIST_VIEW_Y = 20;
 const int LIST_VIEW_WIDTH = 580;
 const int LIST_VIEW_HEIGHT = 200;
 
+AutostartListView listView;
+AddAppButtonView addAppButtonView;
+RemoveAppButtonView removeAppButtonView;
+
+AutostartListModel listModel;
+
 char** GetTextFromAppsList(std::list<AutostartedAppInfo> appsList, int* length) {
 	CStringArray stringArray = CStringArray();
 	for (auto iter = appsList.begin(); iter != appsList.end(); iter++)
@@ -21,32 +27,19 @@ char** GetTextFromAppsList(std::list<AutostartedAppInfo> appsList, int* length) 
 		stringArray.Add(iter->appName);
 		stringArray.Add(iter->appExePath);
 	}
-	*length = stringArray.count/2;
+	*length = stringArray.count / 2;
 	return stringArray.Get();
 }
 
 void RefreshAppsView(AutostartListView listView, AutostartListModel listModel) {
-	int const colNum = 2;
-	int const itemNum = 3;
-	int const textMaxLen = 30;
-	const char* header[colNum] = { "APPLICATION NAME", "APPLICATION PATH" };
-
-	listView.SetListViewColumns(colNum, textMaxLen, header);
+	listView.Clear();
+	listModel.Refresh();
 	int rows = 0;
 	char** text = GetTextFromAppsList(listModel.Get(), &rows);
-	listView.AddListViewItems(colNum, textMaxLen, text, rows);
-	listView.Show();
+	listView.AddListViewItems(2, 30, text, rows);
 }
 
-
-
 LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) {
-	AutostartListView listView;
-	AddAppButtonView addAppButtonView;
-	RemoveAppButtonView removeAppButtonView;
-
-	AutostartListModel listModel;
-
 	switch (Message)
 	{
 	case WM_COMMAND: {
@@ -54,7 +47,6 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 		{
 			OPENFILENAME openFileName;
 			char szFile[1024];
-			HANDLE fileHandle;
 
 			ZeroMemory(&openFileName, sizeof(openFileName));
 			openFileName.lStructSize = sizeof(openFileName);
@@ -75,10 +67,15 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 				if (appNameBox.DoModal("Input your app name", "App name")) {
 
 					char* appName = appNameBox.Text;
-					char* appPath = openFileName.lpstrFile;
+					std::string bufferAppPath = openFileName.lpstrFile;
+					bufferAppPath = "\"" + bufferAppPath + "\"";
+					char* appPath = (char*)bufferAppPath.c_str();
 
 					AutostartedAppInfo newAppInfo = { appName, appPath };
-					listModel.Add(newAppInfo);
+
+					if (listModel.Add(newAppInfo)) {
+						RefreshAppsView(listView, listModel);
+					}
 				}
 			}
 		}
@@ -90,7 +87,9 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 		break;
 	}
 	case WM_CREATE: {
+		const char* header[2] = { "APPLICATION NAME", "APPLICATION PATH" };
 		listView = AutostartListView(hwnd, LIST_VIEW_X, LIST_VIEW_Y, LIST_VIEW_WIDTH, LIST_VIEW_HEIGHT);
+		listView.SetListViewColumns(2, 30, header);
 
 		addAppButtonView = AddAppButtonView(hwnd, 20, 250, 280, 30);
 		addAppButtonView.Show();
@@ -99,6 +98,8 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 		removeAppButtonView.Show();
 
 		RefreshAppsView(listView, listModel);
+
+		listView.Show();
 		break;
 	}
 	case WM_DESTROY: {

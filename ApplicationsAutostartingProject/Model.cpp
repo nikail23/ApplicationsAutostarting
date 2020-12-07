@@ -1,6 +1,5 @@
 #include "Model.h"
-#define reg_run "Software\\Microsoft\\Windows\\CurrentVersion\\Run"
-#define reg_parm "Software\\Microsoft\\Windows\\CurrentVersion"
+#define SUBKEY "Software\\Microsoft\\Windows\\CurrentVersion\\Run"
 
 #if defined(_WIN64)
 #define CROSS_ACCESS KEY_WOW64_32KEY
@@ -22,13 +21,13 @@ std::list<AutostartedAppInfo> AutostartListModel::LoadListFromRegistry()
 {
 	std::list<AutostartedAppInfo> list = std::list<AutostartedAppInfo>();
 	HKEY currentKey;
-	DWORD result = RegOpenKeyEx(HKEY_CURRENT_USER, "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Run", 0, KEY_READ | CROSS_ACCESS, &currentKey);
+	DWORD result = RegOpenKeyEx(HKEY_CURRENT_USER, SUBKEY, 0, KEY_READ | CROSS_ACCESS, &currentKey);
 	if (result == ERROR_SUCCESS)
 	{
 		DWORD valuesCount, maxValueNameSize, maxValueDataSize;
 
 		RegQueryInfoKey(currentKey, NULL, 0, NULL, NULL, NULL, NULL, &valuesCount, &maxValueNameSize, &maxValueDataSize, NULL, NULL);
-		for (int i = 0; i < valuesCount; i++)
+		for (unsigned int i = 0; i < valuesCount; i++)
 		{
 			LPSTR valueName = (LPSTR)malloc((++maxValueNameSize) * sizeof(CHAR));
 			DWORD valueNameSize = maxValueNameSize;
@@ -59,23 +58,31 @@ BOOL AutostartListModel::IsInRegister(AutostartedAppInfo appInfo)
 	return FALSE;
 }
 
-void AutostartListModel::Add(AutostartedAppInfo appInfo)
+BOOL AutostartListModel::Add(AutostartedAppInfo appInfo)
 {
 	if (IsInRegister(appInfo)) {
 		MessageBox(GetActiveWindow(), "Current app already autostarted!", "Error!", MB_ICONERROR);
+		return FALSE;
 	}
 	else {
 		appsList.push_back(appInfo);
-		WriteToRegistry(appInfo);
+		return WriteToRegistry(appInfo);
 	}
 }
 
-void AutostartListModel::WriteToRegistry(AutostartedAppInfo appInfo)
+BOOL AutostartListModel::WriteToRegistry(AutostartedAppInfo appInfo)
 {
-	// запись в реестр
+	HKEY key;
+
+	if (EXIT_SUCCESS == RegOpenKeyEx(HKEY_CURRENT_USER, SUBKEY, 0, KEY_SET_VALUE | CROSS_ACCESS, &key)) {
+		RegSetValueEx(key, appInfo.appName, 0, REG_SZ, (BYTE*)appInfo.appExePath, strlen(appInfo.appExePath));
+		RegCloseKey(key);
+		return TRUE;
+	}	
+	return FALSE;
 }
 
-void AutostartListModel::Delete(AutostartedAppInfo appInfo)
+BOOL AutostartListModel::Delete(AutostartedAppInfo appInfo)
 {
 	for (auto iter = appsList.begin(); iter != appsList.end(); iter++)
 	{
@@ -83,6 +90,7 @@ void AutostartListModel::Delete(AutostartedAppInfo appInfo)
 
 		}
 	}
+	return FALSE;
 }
 
 std::list<AutostartedAppInfo> AutostartListModel::Get()
