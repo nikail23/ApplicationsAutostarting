@@ -40,12 +40,13 @@ char** GetTextFromAppsList(std::list<AutostartedAppInfo> appsList, int* length) 
 	return stringArray.Get();
 }
 
-void RefreshAppsView(AutostartListView listView, AutostartListModel listModel) {
-	listView.Clear();
-	listModel.Refresh();
+void RefreshAppsView(AutostartListView *listView, AutostartListModel *listModel) {
+	(*listView).Clear();
+	(*listModel) = AutostartListModel();
+	// listModel.Refresh();
 	int rows = 0;
-	char** text = GetTextFromAppsList(listModel.Get(), &rows);
-	listView.AddListViewItems(2, 30, text, rows);
+	char** text = GetTextFromAppsList((*listModel).Get(), &rows);
+	(*listView).AddListViewItems(2, 30, text, rows);
 }
 
 LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) {
@@ -89,7 +90,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 					}
 
 					if (listModel.Add(newAppInfo)) {
-						RefreshAppsView(listView, listModel);
+						RefreshAppsView(&listView, &listModel);
 					}
 				}
 			}
@@ -97,7 +98,13 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 
 		if (LOWORD(wParam) == DELETE_APP_BUTTON_CODE)
 		{
-			// обработка удаления приложения из автозапуска
+			int* selectedIndecies = listView.GetSelectedIndecies();
+			int i = 0;
+			while (selectedIndecies[i] != -1) {
+				listModel.Delete(selectedIndecies[i]);
+				i++;
+			}
+			RefreshAppsView(&listView, &listModel);
 		}
 
 		if (LOWORD(wParam) == ONCE_AUTOSTART_CHECKBOX_CODE) {
@@ -125,7 +132,7 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 		onceAutostartCheckbox = OnceAutostartCheckbox(hwnd, 95, 280, 150, 30);
 		onceAutostartCheckbox.Show();
 
-		RefreshAppsView(listView, listModel);
+		RefreshAppsView(&listView, &listModel);
 
 		listView.Show();
 		break;

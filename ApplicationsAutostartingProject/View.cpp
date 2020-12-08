@@ -62,6 +62,28 @@ int AutostartListView::SetListViewColumns(int colNum, int textMaxLen, const char
     return index;
 }
 
+int* AutostartListView::GetSelectedIndecies()
+{
+    int iPos = ListView_GetNextItem(hWnd, -1, LVNI_SELECTED);
+    int size = 0;
+    while (iPos != -1) {
+        size++;
+        iPos = ListView_GetNextItem(hWnd, iPos, LVNI_SELECTED);
+    }
+
+    int i = 0;
+    int* selectedIndecies = new int[size + 1];
+    iPos = ListView_GetNextItem(hWnd, -1, LVNI_SELECTED);
+    while (iPos != -1) {
+        selectedIndecies[i] = iPos;
+        i++;
+        iPos = ListView_GetNextItem(hWnd, iPos, LVNI_SELECTED);
+    }
+    selectedIndecies[i] = -1;
+
+    return selectedIndecies;
+}
+
 void AutostartListView::Show()
 {
     ShowWindow(hWnd, SW_SHOWDEFAULT);

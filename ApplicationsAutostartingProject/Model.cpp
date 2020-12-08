@@ -8,8 +8,7 @@
 #define CROSS_ACCESS KEY_WOW64_64KEY
 #endif
 
-AutostartListModel::AutostartListModel()
-{
+AutostartListModel::AutostartListModel() {
 	Refresh();
 }
 
@@ -71,7 +70,6 @@ std::list<AutostartedAppInfo> AutostartListModel::LoadListFromRegistry()
 
 BOOL AutostartListModel::Add(AutostartedAppInfo appInfo)
 {
-	appsList.push_back(appInfo);
 	return WriteToRegistry(appInfo);
 }
 
@@ -96,13 +94,36 @@ BOOL AutostartListModel::WriteToRegistry(AutostartedAppInfo appInfo)
 	}
 }
 
-BOOL AutostartListModel::Delete(AutostartedAppInfo appInfo)
+BOOL AutostartListModel::RemoveFromRegistry(AutostartedAppInfo appInfo)
 {
+	HKEY key;
+	if (appInfo.isOnce) {
+		if (EXIT_SUCCESS == RegOpenKeyEx(HKEY_CURRENT_USER, ONCE_AUTOSTART_SUBKEY, 0, KEY_SET_VALUE | CROSS_ACCESS, &key)) {
+			RegDeleteValue(key, appInfo.appName);
+			RegCloseKey(key);
+			return TRUE;
+		}
+		return FALSE;
+	}
+	else {
+		if (EXIT_SUCCESS == RegOpenKeyEx(HKEY_CURRENT_USER, AUTOSTART_SUBKEY, 0, KEY_SET_VALUE | CROSS_ACCESS, &key)) {
+			RegDeleteValue(key, appInfo.appName);
+			RegCloseKey(key);
+			return TRUE;
+		}
+		return FALSE;
+	}
+}
+
+BOOL AutostartListModel::Delete(int index)
+{
+	int i = 0;
 	for (auto iter = appsList.begin(); iter != appsList.end(); iter++)
 	{
-		if (((*iter).appExePath == appInfo.appExePath) && ((*iter).appName == appInfo.appName)) {
-
+		if (i == index) {
+			return RemoveFromRegistry(*iter);
 		}
+		i++;
 	}
 	return FALSE;
 }

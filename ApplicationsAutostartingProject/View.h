@@ -15,6 +15,7 @@ class AutostartListView
 		AutostartListView(HWND hWndParent, int x, int y, int width, int height);
 		BOOL AddListViewItems(int colNum, int textMaxLen, char** item, int rows);
 		int SetListViewColumns(int colNum, int textMaxLen, const char** header);
+		int* GetSelectedIndecies();
 		void Show();
 		void Clear();
 };
