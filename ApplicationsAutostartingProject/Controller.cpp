@@ -17,6 +17,7 @@ const int LIST_VIEW_HEIGHT = 200;
 AutostartListView listView;
 AddAppButtonView addAppButtonView;
 RemoveAppButtonView removeAppButtonView;
+OnceAutostartCheckbox onceAutostartCheckbox;
 
 AutostartListModel listModel;
 
@@ -24,8 +25,16 @@ char** GetTextFromAppsList(std::list<AutostartedAppInfo> appsList, int* length) 
 	CStringArray stringArray = CStringArray();
 	for (auto iter = appsList.begin(); iter != appsList.end(); iter++)
 	{
-		stringArray.Add(iter->appName);
-		stringArray.Add(iter->appExePath);
+		if (iter->isOnce) {
+			std::string onceAppName = iter->appName;
+			onceAppName = "ONCE! " + onceAppName;
+			stringArray.Add(onceAppName.c_str());
+			stringArray.Add(iter->appExePath);
+		}
+		else {
+			stringArray.Add(iter->appName);
+			stringArray.Add(iter->appExePath);
+		}
 	}
 	*length = stringArray.count / 2;
 	return stringArray.Get();
@@ -71,7 +80,13 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 					bufferAppPath = "\"" + bufferAppPath + "\"";
 					char* appPath = (char*)bufferAppPath.c_str();
 
-					AutostartedAppInfo newAppInfo = { appName, appPath };
+					AutostartedAppInfo newAppInfo;
+					if (IsDlgButtonChecked(hwnd, ONCE_AUTOSTART_CHECKBOX_CODE)) {
+						newAppInfo = { appName, appPath, TRUE };
+					}
+					else {
+						newAppInfo = { appName, appPath, FALSE };
+					}
 
 					if (listModel.Add(newAppInfo)) {
 						RefreshAppsView(listView, listModel);
@@ -83,6 +98,16 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 		if (LOWORD(wParam) == DELETE_APP_BUTTON_CODE)
 		{
 			// обработка удаления приложения из автозапуска
+		}
+
+		if (LOWORD(wParam) == ONCE_AUTOSTART_CHECKBOX_CODE) {
+			BOOL checked = IsDlgButtonChecked(hwnd, ONCE_AUTOSTART_CHECKBOX_CODE);
+			if (checked) {
+				CheckDlgButton(hwnd, ONCE_AUTOSTART_CHECKBOX_CODE, BST_UNCHECKED);
+			}
+			else {
+				CheckDlgButton(hwnd, ONCE_AUTOSTART_CHECKBOX_CODE, BST_CHECKED);
+			}
 		}
 		break;
 	}
@@ -96,6 +121,9 @@ LRESULT CALLBACK WndProc(HWND hwnd, UINT Message, WPARAM wParam, LPARAM lParam) 
 
 		removeAppButtonView = RemoveAppButtonView(hwnd, 310, 250, 280, 30);
 		removeAppButtonView.Show();
+
+		onceAutostartCheckbox = OnceAutostartCheckbox(hwnd, 95, 280, 150, 30);
+		onceAutostartCheckbox.Show();
 
 		RefreshAppsView(listView, listModel);
 

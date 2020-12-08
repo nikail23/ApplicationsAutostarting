@@ -6,6 +6,7 @@ struct AutostartedAppInfo
 {
 	char* appName;
 	char* appExePath;
+	BOOL isOnce;
 };
 
 class AutostartListModel
@@ -13,7 +14,6 @@ class AutostartListModel
 	private:
 		std::list<AutostartedAppInfo> appsList;
 		std::list<AutostartedAppInfo> LoadListFromRegistry();
-		BOOL IsInRegister(AutostartedAppInfo appInfo);
 		BOOL WriteToRegistry(AutostartedAppInfo appInfo);
 	public: 
 		AutostartListModel();

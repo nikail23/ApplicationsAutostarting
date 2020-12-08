@@ -1,12 +1,14 @@
 #pragma once
 #include <windows.h>
+#include <string>
 #define ADD_APP_BUTTON_CODE  10000
 #define DELETE_APP_BUTTON_CODE  10001
+#define ONCE_AUTOSTART_CHECKBOX_CODE  10002
 
 class AutostartListView
 {
 	private:
-		HWND hWndLV;
+		HWND hWnd;
 		HWND CreateListView(HWND hWndParent, int x, int y, int width, int height, UINT uId);
 	public:
 		AutostartListView();
@@ -20,7 +22,7 @@ class AutostartListView
 class AddAppButtonView 
 {
 	private:
-		HWND hWndButton;
+		HWND hWnd;
 	public:
 		AddAppButtonView();
 		AddAppButtonView(HWND parent, int x, int y, int width, int height);
@@ -30,10 +32,20 @@ class AddAppButtonView
 class RemoveAppButtonView
 {
 private:
-	HWND hWndButton;
+	HWND hWnd;
 public:
 	RemoveAppButtonView();
 	RemoveAppButtonView(HWND parent, int x, int y, int width, int height);
 	void Show();
+};
+
+class OnceAutostartCheckbox 
+{
+	private:
+		HWND hWnd;
+	public:
+		OnceAutostartCheckbox();
+		OnceAutostartCheckbox(HWND parent, int x, int y, int width, int height);
+		void Show();
 };
 

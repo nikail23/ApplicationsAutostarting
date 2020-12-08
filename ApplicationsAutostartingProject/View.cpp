@@ -1,18 +1,20 @@
 #include "View.h"
 #include <commctrl.h>
+#include "InputBox.h"
+#include <string>
 #define IDC_LISTVIEW 1111
 
 AutostartListView::AutostartListView() {}
 
 AutostartListView::AutostartListView(HWND hWndParent, int x, int y, int width, int height)
 {
-    if ((hWndLV = CreateListView(hWndParent, x, y, width, height, IDC_LISTVIEW)) == NULL)
+    if ((hWnd = CreateListView(hWndParent, x, y, width, height, IDC_LISTVIEW)) == NULL)
         MessageBox(NULL, "Cant create a ListView component!", "Error!", MB_OK);
 }
 
 BOOL AutostartListView::AddListViewItems(int colNum, int textMaxLen, char** item, int rowsNum)
 {
-    SendMessage(hWndLV, WM_SETREDRAW, FALSE, 0);
+    SendMessage(hWnd, WM_SETREDRAW, FALSE, 0);
 
     int textIndex = 0;
     for (int itemIndex = 0; itemIndex < rowsNum; itemIndex++) {
@@ -26,14 +28,14 @@ BOOL AutostartListView::AddListViewItems(int colNum, int textMaxLen, char** item
         item.pszText = text1;
         item.iSubItem = 0;
 
-        if (ListView_InsertItem(hWndLV, &item) == -1)
+        if (ListView_InsertItem(hWnd, &item) == -1)
             return FALSE;
 
-        ListView_SetItemText(hWndLV, itemIndex, 1, (LPSTR)text2);
+        ListView_SetItemText(hWnd, itemIndex, 1, (LPSTR)text2);
         textIndex += 2;
     }
 
-    SendMessage(hWndLV, WM_SETREDRAW, TRUE, 0);
+    SendMessage(hWnd, WM_SETREDRAW, TRUE, 0);
 
     return TRUE;
 }
@@ -41,7 +43,7 @@ BOOL AutostartListView::AddListViewItems(int colNum, int textMaxLen, char** item
 int AutostartListView::SetListViewColumns(int colNum, int textMaxLen, const char** header)
 {
     RECT rcl;
-    GetClientRect(hWndLV, &rcl);
+    GetClientRect(hWnd, &rcl);
 
     int index = -1;
 
@@ -53,7 +55,7 @@ int AutostartListView::SetListViewColumns(int colNum, int textMaxLen, const char
     for (int i = 0; i < colNum; i++)
     {
         lvc.pszText = (LPSTR)header[i];
-        index = ListView_InsertColumn(hWndLV, i, &lvc);
+        index = ListView_InsertColumn(hWnd, i, &lvc);
         if (index == -1) break;
     }
 
@@ -62,12 +64,12 @@ int AutostartListView::SetListViewColumns(int colNum, int textMaxLen, const char
 
 void AutostartListView::Show()
 {
-    ShowWindow(hWndLV, SW_SHOWDEFAULT);
+    ShowWindow(hWnd, SW_SHOWDEFAULT);
 }
 
 void AutostartListView::Clear()
 {
-    SendMessage(hWndLV, LVM_DELETEALLITEMS, 0, 0);
+    SendMessage(hWnd, LVM_DELETEALLITEMS, 0, 0);
 }
 
 HWND AutostartListView::CreateListView(HWND hWndParent, int x, int y, int width, int height, UINT uId)
@@ -94,7 +96,7 @@ AddAppButtonView::AddAppButtonView() {}
 
 AddAppButtonView::AddAppButtonView(HWND parent, int x, int y, int width, int height)
 {
-    hWndButton = CreateWindow(
+    hWnd = CreateWindow(
         "BUTTON",  
         "Add app to autoload",      
         WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,  
@@ -110,7 +112,7 @@ AddAppButtonView::AddAppButtonView(HWND parent, int x, int y, int width, int hei
 
 void AddAppButtonView::Show()
 {
-    ShowWindow(hWndButton, SW_SHOWDEFAULT);
+    ShowWindow(hWnd, SW_SHOWDEFAULT);
 }
 
 RemoveAppButtonView::RemoveAppButtonView()
@@ -119,7 +121,7 @@ RemoveAppButtonView::RemoveAppButtonView()
 
 RemoveAppButtonView::RemoveAppButtonView(HWND parent, int x, int y, int width, int height)
 {
-    hWndButton = CreateWindow(
+    hWnd = CreateWindow(
         "BUTTON",
         "Remove selected app from autoload",
         WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,
@@ -135,5 +137,19 @@ RemoveAppButtonView::RemoveAppButtonView(HWND parent, int x, int y, int width, i
 
 void RemoveAppButtonView::Show()
 {
-    ShowWindow(hWndButton, SW_SHOWDEFAULT);
+    ShowWindow(hWnd, SW_SHOWDEFAULT);
+}
+
+OnceAutostartCheckbox::OnceAutostartCheckbox()
+{
+}
+
+OnceAutostartCheckbox::OnceAutostartCheckbox(HWND parent, int x, int y, int width, int height)
+{
+    hWnd = CreateWindowEx(NULL, "BUTTON", "Once autostart", WS_VISIBLE | WS_CHILD | BS_CHECKBOX, x, y, width, height, parent, (HMENU)ONCE_AUTOSTART_CHECKBOX_CODE, NULL, NULL);
+}
+
+void OnceAutostartCheckbox::Show()
+{
+    ShowWindow(hWnd, SW_SHOWDEFAULT);
 }
